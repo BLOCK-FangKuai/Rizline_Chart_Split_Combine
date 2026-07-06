@@ -17,7 +17,7 @@ namespace Rizline_Chart
         public List<Line>? lines;
         public List<CanvasMove> canvasMoves;
         public List<CameraMove> cameraMoves;
-        public Db? __db;
+        public Dictionary<string, string>? __db;
     }
 
     public class Theme
@@ -60,7 +60,7 @@ namespace Rizline_Chart
 
     public class Note
     {
-        public int type;
+        public NoteType type;
         public float time;
         public float floorPosition;
         /// <summary>
@@ -95,21 +95,37 @@ namespace Rizline_Chart
     public class KeyPoint
     {
         public float time, value;
-        public int easeType;
+        public EaseType easeType;
         public float floorPosition;
     }
 
-    public class Db
+    public enum NoteType
     {
-        public string steam_workshop_fileid,
-            steam_workshop_userid,
-            steam_workshop_title,
-            steam_workshop_description,
-            steam_workshop_composer,
-            steam_workshop_difficulty,
-            steam_workshop_level,
-            steam_workshop_previewtime,
-            steam_workshop_illustration,
-            steam_workshop_visibility;
+        tap,
+        drag,
+        hold
+    }
+
+    public enum EaseType
+    {
+        linear = 0,
+        inQuad = 1,
+        outQuad = 2,
+        inOutQuad = 3,
+        inCubic = 4,
+        outCubic = 5,
+        inOutCubic = 6,
+        inQuart = 7,
+        outQuart = 8,
+        inOutQuart = 9,
+        inQuint = 10,
+        outQuint = 11,
+        inOutQuint = 12,
+        zero = 13,
+        one = 14,
+        inCircle = 15,
+        outCircle = 16,
+        sin = 17,
+        cos = 18
     }
 }
