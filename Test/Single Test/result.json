@@ -1,0 +1,268 @@
+{
+  "themes": [
+    {
+      "colorsList": [
+        {
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 255
+        },
+        {
+          "g": 192,
+          "b": 255,
+          "a": 255
+        },
+        {
+          "g": 192,
+          "b": 255,
+          "a": 255
+        }
+      ]
+    },
+    {
+      "colorsList": [
+        {
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 255
+        },
+        {
+          "g": 192,
+          "b": 255,
+          "a": 255
+        },
+        {
+          "g": 192,
+          "b": 255,
+          "a": 255
+        }
+      ]
+    }
+  ],
+  "challengeTimes": [
+    {
+      "transTime": 0.5
+    }
+  ],
+  "bPM": 105.0,
+  "bpmShifts": [
+    {
+      "value": 1.0
+    }
+  ],
+  "lines": [
+    {
+      "linePoints": [
+        {
+          "time": 1.0,
+          "xPosition": -0.5,
+          "color": {
+            "a": 255
+          },
+          "floorPosition": 0.5714286
+        },
+        {
+          "time": 9.0,
+          "xPosition": 0.5,
+          "color": {
+            "a": 255
+          },
+          "floorPosition": 5.142857
+        }
+      ],
+      "notes": [],
+      "judgeRingColor": [
+        {
+          "startColor": {
+            "a": 255
+          },
+          "endColor": {
+            "a": 255
+          },
+          "time": 1.0
+        }
+      ],
+      "lineColor": []
+    },
+    {
+      "linePoints": [
+        {
+          "time": 9.0,
+          "xPosition": -0.1,
+          "color": {
+            "a": 255
+          },
+          "canvasIndex": 1,
+          "floorPosition": 5.142857
+        },
+        {
+          "time": 18.0,
+          "xPosition": 0.2,
+          "color": {
+            "a": 255
+          },
+          "canvasIndex": 1,
+          "floorPosition": 12.0
+        }
+      ],
+      "notes": [],
+      "judgeRingColor": [
+        {
+          "startColor": {
+            "a": 255
+          },
+          "endColor": {
+            "a": 255
+          },
+          "time": 9.0
+        }
+      ],
+      "lineColor": []
+    },
+    {
+      "linePoints": [
+        {
+          "time": 18.0,
+          "xPosition": 0.4,
+          "color": {
+            "a": 255
+          },
+          "canvasIndex": 2,
+          "floorPosition": 10.285714
+        },
+        {
+          "time": 29.0,
+          "xPosition": -0.3,
+          "color": {
+            "a": 255
+          },
+          "canvasIndex": 2,
+          "floorPosition": 16.571428
+        }
+      ],
+      "notes": [],
+      "judgeRingColor": [
+        {
+          "startColor": {
+            "a": 255
+          },
+          "endColor": {
+            "a": 255
+          },
+          "time": 18.0
+        }
+      ],
+      "lineColor": []
+    },
+    {
+      "linePoints": [
+        {
+          "time": 27.0,
+          "xPosition": -0.3,
+          "color": {
+            "a": 255
+          },
+          "easeType": 15,
+          "canvasIndex": 3,
+          "floorPosition": 15.428572
+        },
+        {
+          "time": 36.0,
+          "xPosition": 0.2,
+          "color": {
+            "a": 255
+          },
+          "easeType": 15,
+          "canvasIndex": 3,
+          "floorPosition": 20.571428
+        }
+      ],
+      "notes": [],
+      "judgeRingColor": [
+        {
+          "startColor": {
+            "a": 255
+          },
+          "endColor": {
+            "a": 255
+          },
+          "time": 27.0
+        }
+      ],
+      "lineColor": []
+    }
+  ],
+  "canvasMoves": [
+    {
+      "xPositionKeyPoints": [
+        {},
+        {},
+        {}
+      ],
+      "speedKeyPoints": [
+        {
+          "time": -4.0,
+          "value": 1.0
+        },
+        {
+          "time": -4.0,
+          "value": 1.0
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "xPositionKeyPoints": [
+        {
+          "time": 5.0
+        },
+        {
+          "time": 5.0
+        }
+      ],
+      "speedKeyPoints": [
+        {
+          "time": 5.0,
+          "value": 1.0
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "xPositionKeyPoints": [
+        {
+          "time": 14.0
+        },
+        {
+          "time": 14.0
+        }
+      ],
+      "speedKeyPoints": [
+        {
+          "time": 14.0,
+          "value": 1.0
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "xPositionKeyPoints": [
+        {
+          "time": 23.0
+        },
+        {
+          "time": 23.0
+        }
+      ],
+      "speedKeyPoints": [
+        {
+          "time": 23.0,
+          "value": 1.0
+        }
+      ]
+    }
+  ],
+  "cameraMoves": []
+}

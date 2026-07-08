@@ -10,13 +10,13 @@ namespace Rizline_Chart
     {
         public int fileVersion;
         public int chartDelayMs;
-        public List<Theme> themes;
-        public List<ChallengeTime> challengeTimes;
+        public List<Theme> themes = new();
+        public List<ChallengeTime> challengeTimes = new();
         public float bPM;
-        public List<KeyPoint> bpmShifts;
-        public List<Line>? lines;
-        public List<CanvasMove> canvasMoves;
-        public List<CameraMove> cameraMoves;
+        public List<KeyPoint> bpmShifts = new();
+        public List<Line> lines = new();
+        public List<CanvasMove> canvasMoves = new();
+        public List<CameraMove> cameraMoves = new();
         public Dictionary<string, string>? __db;
     }
 

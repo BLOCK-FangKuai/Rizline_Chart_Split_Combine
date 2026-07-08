@@ -8,9 +8,9 @@ namespace Rizline_Chart
         public List<float> splitTimes = new();
         public float overlapTime = 4;
         public string baseChartName = "base";
-        public List<string>? files;
+        public List<string> files = new();
         public string resultName = "result";
-        public bool autoOverride = false;
+        public bool autoOverWritten = false;
 
         public bool Check()
         {
