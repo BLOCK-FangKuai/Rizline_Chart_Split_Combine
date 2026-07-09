@@ -16,7 +16,7 @@ namespace Rizline_Chart
         public List<KeyPoint> bpmShifts = new();
         public List<Line> lines = new();
         public List<CanvasMove> canvasMoves = new();
-        public List<CameraMove> cameraMoves = new();
+        public CameraMove cameraMove = new();
         public Dictionary<string, string>? __db;
     }
 
@@ -32,27 +32,33 @@ namespace Rizline_Chart
 
     public class Color
     {
-        public int r, g, b, a;
+        public int r;
+        public int g;
+        public int b;
+        public int a;
     }
 
     public class ChallengeTime
     {
-        public float checkPoint, start, end, transTime;
+        public float checkPoint;
+        public float start;
+        public float end;
+        public float transTime;
     }
 
     public class Line
     {
-        public List<LinePoint> linePoints;
-        public List<Note> notes;
-        public List<ColorKeyPoint> judgeRingColor;
-        public List<ColorKeyPoint> lineColor;
+        public List<LinePoint> linePoints = new();
+        public List<Note> notes = new();
+        public List<ColorKeyPoint> judgeRingColor = new();
+        public List<ColorKeyPoint> lineColor = new();
     }
 
     public class LinePoint
     {
         public float time;
         public float xPosition;
-        public Color color;
+        public Color color = new();
         public int easeType;
         public int canvasIndex;
         public float floorPosition;
@@ -74,27 +80,28 @@ namespace Rizline_Chart
 
     public class ColorKeyPoint
     {
-        public Color startColor;
-        public Color endColor;
+        public Color startColor = new();
+        public Color endColor = new();
         public float time;
     }
 
     public class CanvasMove
     {
         public int index;
-        public List<KeyPoint> xPositionKeyPoints;
-        public List<KeyPoint> speedKeyPoints;
+        public List<KeyPoint> xPositionKeyPoints = new();
+        public List<KeyPoint> speedKeyPoints = new();
     }
 
     public class CameraMove
     {
-        public List<KeyPoint> scaleKeyPoints;
-        public List<KeyPoint> xPositionKeyPoints;
+        public List<KeyPoint> scaleKeyPoints = new();
+        public List<KeyPoint> xPositionKeyPoints = new();
     }
 
     public class KeyPoint
     {
-        public float time, value;
+        public float time;
+        public float value;
         public EaseType easeType;
         public float floorPosition;
     }

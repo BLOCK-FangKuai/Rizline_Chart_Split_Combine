@@ -14,6 +14,10 @@ namespace Rizline_Chart
 
         public bool Check()
         {
+            if (overlapTime < 0)
+            {
+                overlapTime = 0;
+            }
             return IsFileEmpty() || splitTimes.Count + 1 == files.Count;
         }
 

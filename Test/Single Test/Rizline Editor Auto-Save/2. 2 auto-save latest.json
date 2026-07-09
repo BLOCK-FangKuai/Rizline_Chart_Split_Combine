@@ -68,20 +68,7 @@
     {
       "linePoints": [
         {
-          "time": 18.0,
-          "xPosition": 0.4,
-          "color": {
-            "r": 0,
-            "g": 0,
-            "b": 0,
-            "a": 255
-          },
-          "easeType": 0,
-          "canvasIndex": 0,
-          "floorPosition": 0.0
-        },
-        {
-          "time": 29.0,
+          "time": 1.0,
           "xPosition": -0.3,
           "color": {
             "r": 0,
@@ -89,9 +76,22 @@
             "b": 0,
             "a": 255
           },
-          "easeType": 0,
+          "easeType": 1,
           "canvasIndex": 0,
-          "floorPosition": 0.0
+          "floorPosition": 0.5714286
+        },
+        {
+          "time": 4.0,
+          "xPosition": -0.1,
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "easeType": 1,
+          "canvasIndex": 0,
+          "floorPosition": 2.28571439
         }
       ],
       "notes": [],
@@ -109,7 +109,167 @@
             "b": 0,
             "a": 255
           },
-          "time": 18.0
+          "time": 1.0
+        }
+      ],
+      "lineColor": []
+    },
+    {
+      "linePoints": [
+        {
+          "time": 1.5,
+          "xPosition": -0.2,
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "easeType": 1,
+          "canvasIndex": 0,
+          "floorPosition": 0.857142866
+        },
+        {
+          "time": 5.0,
+          "xPosition": 0.05,
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "easeType": 1,
+          "canvasIndex": 0,
+          "floorPosition": 2.857143
+        }
+      ],
+      "notes": [],
+      "judgeRingColor": [
+        {
+          "startColor": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "endColor": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "time": 1.5
+        }
+      ],
+      "lineColor": []
+    },
+    {
+      "linePoints": [
+        {
+          "time": 2.0,
+          "xPosition": -0.1,
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "easeType": 1,
+          "canvasIndex": 0,
+          "floorPosition": 1.14285719
+        },
+        {
+          "time": 4.0,
+          "xPosition": 0.0,
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "easeType": 1,
+          "canvasIndex": 0,
+          "floorPosition": 2.28571439
+        }
+      ],
+      "notes": [],
+      "judgeRingColor": [
+        {
+          "startColor": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "endColor": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "time": 2.0
+        }
+      ],
+      "lineColor": []
+    },
+    {
+      "linePoints": [
+        {
+          "time": 0.0,
+          "xPosition": -0.2,
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "easeType": 1,
+          "canvasIndex": 0,
+          "floorPosition": 0.0
+        },
+        {
+          "time": 0.5,
+          "xPosition": -0.05,
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "easeType": 1,
+          "canvasIndex": 0,
+          "floorPosition": 0.0
+        },
+        {
+          "time": 0.75,
+          "xPosition": 0.1,
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "easeType": 1,
+          "canvasIndex": 0,
+          "floorPosition": 0.428571433
+        }
+      ],
+      "notes": [],
+      "judgeRingColor": [
+        {
+          "startColor": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "endColor": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 255
+          },
+          "time": 0.0
         }
       ],
       "lineColor": []

@@ -12,7 +12,6 @@ namespace Rizline_Chart
 
         static JsonSerializerSettings serializerSettings = new()
         {
-            DefaultValueHandling = DefaultValueHandling.Ignore,
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore
         };
@@ -233,7 +232,8 @@ namespace Rizline_Chart
                 Chart splitedChart = SplitChart(chart, i, settings.splitTimes.Count);
                 resultChart.lines.AddRange(splitedChart.lines);
                 resultChart.canvasMoves.AddRange(splitedChart.canvasMoves);
-                resultChart.cameraMoves.AddRange(splitedChart.cameraMoves);
+                resultChart.cameraMove.scaleKeyPoints.AddRange(splitedChart.cameraMove.scaleKeyPoints);
+                resultChart.cameraMove.xPositionKeyPoints.AddRange(splitedChart.cameraMove.xPositionKeyPoints);
             }
         }
 
@@ -247,14 +247,13 @@ namespace Rizline_Chart
             {
                 chart.lines[i] = CutLine(chart.lines[i], chart.canvasMoves, start, end, overlap);
             }
+            chart.lines.RemoveAll(line => line.linePoints.Count == 0);
             for (int i = 0; i < chart.canvasMoves.Count; i++)
             {
                 chart.canvasMoves[i] = CutCanvasMove(chart.canvasMoves[i], start, end, overlap);
             }
-            for (int i = 0; i < chart.cameraMoves.Count; i++)
-            {
-                chart.cameraMoves[i] = CutCameraMove(chart.cameraMoves[i], start, end);
-            }
+            chart.cameraMove = CutCameraMove(chart.cameraMove, start, end);
+            
 
             return chart;
         }
@@ -265,15 +264,54 @@ namespace Rizline_Chart
             float lineEnd = end + overlap;
 
             //截取在指定时间内的节点，将最近的超界的节点的时间设置为边界值
-            List<LinePoint> inLinePoints = line.linePoints.FindAll(point => point.time > lineStart && point.time < lineEnd);
-            int firstPointIndex = inLinePoints.Count > 0 ? line.linePoints.IndexOf(inLinePoints[0]) : 0;
-            int finalPointIndex = inLinePoints.Count > 0 ? line.linePoints.IndexOf(inLinePoints[^1]) : line.linePoints.Count - 1;
-            line.linePoints[firstPointIndex].time = line.linePoints[firstPointIndex].time < lineStart ?
-                lineStart : line.linePoints[firstPointIndex].time;
-            line.linePoints[finalPointIndex].time = line.linePoints[finalPointIndex].time > lineEnd ?
-                lineEnd : line.linePoints[finalPointIndex].time;
-            inLinePoints.Insert(0, line.linePoints[firstPointIndex]);
-            inLinePoints.Add(line.linePoints[finalPointIndex]);
+            List<LinePoint> inLinePoints = new();
+            for (int i = 0; i < line.linePoints.Count - 1; i++)
+            {
+                LinePoint[] points = [line.linePoints[i], line.linePoints[i + 1]];
+                if (points[0].time < lineStart)
+                {
+                    if (points[1].time > lineStart)
+                    {
+                        points[0].time = lineStart;
+                        inLinePoints.Add(points[0]);
+                        if (points[1].time > lineEnd)
+                        {
+                            points[1].time = lineEnd;
+                            inLinePoints.Add(points[1]);
+                            break;
+                        }
+                        else
+                        {
+                            if (i + 1 == line.linePoints.Count - 1)
+                            {
+                                inLinePoints.Add(points[1]);
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (points[0].time < lineEnd)
+                    {
+                        inLinePoints.Add(points[0]);
+                        if (points[1].time > lineEnd)
+                        {
+                            points[1].time = lineEnd;
+                            inLinePoints.Add(points[1]);
+                            break;
+                        }
+                        else
+                        {
+                            if (i + 1 == line.linePoints.Count - 1)
+                            {
+                                inLinePoints.Add(points[1]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            line.linePoints = inLinePoints;
 
             //增加画布的编号
             foreach (var point in line.linePoints)
@@ -316,25 +354,49 @@ namespace Rizline_Chart
 
             canvasMove.index += resultChart.canvasMoves.Count;
 
-            //截取在指定时间内的关键帧节点，将最近的超界的关键帧节点的时间设置为边界值
-            List<KeyPoint> inKeyPoints = canvasMove.xPositionKeyPoints.FindAll(point => point.time > start && point.time < end);
-            int firstPointIndex = inKeyPoints.Count > 0 ? canvasMove.xPositionKeyPoints.IndexOf(inKeyPoints[0]) : 0;
-            int finalPointIndex = inKeyPoints.Count > 0 ? canvasMove.xPositionKeyPoints.IndexOf(inKeyPoints[^1]) : canvasMove.xPositionKeyPoints.Count - 1;
-            canvasMove.xPositionKeyPoints[firstPointIndex].time =
-                canvasMove.xPositionKeyPoints[firstPointIndex].time < start ?
-                start : canvasMove.xPositionKeyPoints[firstPointIndex].time;
-            canvasMove.xPositionKeyPoints[finalPointIndex].time =
-                canvasMove.xPositionKeyPoints[finalPointIndex].time > end ?
-                end : canvasMove.xPositionKeyPoints[finalPointIndex].time;
-            inKeyPoints.Insert(0, canvasMove.xPositionKeyPoints[firstPointIndex]);
-            inKeyPoints.Add(canvasMove.xPositionKeyPoints[finalPointIndex]);
+            //截取在指定时间内的关键帧节点，将最后的超界的关键帧节点的时间设置为边界值
+            List<KeyPoint> inKeyPoints = canvasMove.xPositionKeyPoints.FindAll(point => point.time <= end);
+            //int firstPointIndex = inKeyPoints.Count > 0 ? canvasMove.xPositionKeyPoints.IndexOf(inKeyPoints[0]) : 1;
+            int finalPointIndex = inKeyPoints.Count > 0 ?
+                canvasMove.xPositionKeyPoints.IndexOf(inKeyPoints[^1]) : canvasMove.xPositionKeyPoints.Count - 2;
+            /*if (firstPointIndex - 1 >= 0)
+            {
+                if (canvasMove.xPositionKeyPoints[firstPointIndex - 1].time < start)
+                {
+                    canvasMove.xPositionKeyPoints[firstPointIndex - 1].time = start;
+                }
+                if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
+                {
+                    inKeyPoints.Insert(0, canvasMove.xPositionKeyPoints[firstPointIndex - 1]);
+                }
+            }*/
+            if (finalPointIndex + 1 < canvasMove.xPositionKeyPoints.Count)
+            {
+                if (canvasMove.xPositionKeyPoints[finalPointIndex + 1].time > end)
+                {
+                    canvasMove.xPositionKeyPoints[finalPointIndex + 1].time = end;
+                }
+                if (inKeyPoints.Count == 0 || inKeyPoints[^1].time != end)
+                {
+                    inKeyPoints.Add(canvasMove.xPositionKeyPoints[finalPointIndex + 1]);
+                }
+            }
 
             canvasMove.xPositionKeyPoints = inKeyPoints;
 
-            inKeyPoints = canvasMove.speedKeyPoints.FindAll(point => point.time > start && point.time <= end);
-            firstPointIndex = inKeyPoints.Count > 0 ? canvasMove.speedKeyPoints.IndexOf(inKeyPoints[0]) : 0;
-            canvasMove.speedKeyPoints[firstPointIndex].time = start;
-            inKeyPoints.Insert(0, canvasMove.speedKeyPoints[firstPointIndex]);
+            inKeyPoints = canvasMove.speedKeyPoints.FindAll(point =>point.time <= end);
+            /*firstPointIndex = inKeyPoints.Count > 0 ? canvasMove.speedKeyPoints.IndexOf(inKeyPoints[0]) : 1;
+            if (firstPointIndex - 1 >= 0)
+            {
+                if (firstPointIndex - 1 >= 0 && inKeyPoints[0].time != start)
+                {
+                    canvasMove.speedKeyPoints[firstPointIndex - 1].time = start;
+                }
+                if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
+                {
+                    inKeyPoints.Insert(0, canvasMove.speedKeyPoints[firstPointIndex - 1]);
+                }
+            }*/
 
             canvasMove.speedKeyPoints = inKeyPoints;
 
@@ -344,19 +406,35 @@ namespace Rizline_Chart
         private static CameraMove CutCameraMove(CameraMove cameraMove, float start, float end)
         {
             //截取在指定时间内的关键帧节点，将最开始的超界的关键帧节点的时间设置为边界值
-            List<KeyPoint> inKeyPoints = cameraMove.xPositionKeyPoints.FindAll(point => point.time > start && point.time <= end);
-            int firstPointIndex = inKeyPoints.Count > 0 ? cameraMove.xPositionKeyPoints.IndexOf(inKeyPoints[0]) : 0;
-            cameraMove.xPositionKeyPoints[firstPointIndex].time =
-                cameraMove.xPositionKeyPoints[firstPointIndex].time < start ?
-                start : cameraMove.xPositionKeyPoints[firstPointIndex].time;
-            inKeyPoints.Insert(0, cameraMove.xPositionKeyPoints[firstPointIndex]);
+            List<KeyPoint> inKeyPoints = cameraMove.xPositionKeyPoints.FindAll(point => point.time >= start && point.time <= end);
+            int firstPointIndex = inKeyPoints.Count > 0 ? cameraMove.xPositionKeyPoints.IndexOf(inKeyPoints[0]) : 1;
+            if (firstPointIndex - 1 >= 0)
+            {
+                if (cameraMove.xPositionKeyPoints[firstPointIndex - 1].time < start)
+                {
+                    cameraMove.xPositionKeyPoints[firstPointIndex - 1].time = start;
+                }
+                if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
+                {
+                    inKeyPoints.Insert(0, cameraMove.xPositionKeyPoints[firstPointIndex - 1]);
+                }
+            }
 
             cameraMove.xPositionKeyPoints = inKeyPoints;
 
             inKeyPoints = cameraMove.scaleKeyPoints.FindAll(point => point.time > start && point.time <= end);
-            firstPointIndex = inKeyPoints.Count > 0 ? cameraMove.scaleKeyPoints.IndexOf(inKeyPoints[0]) : 0;
-            cameraMove.scaleKeyPoints[firstPointIndex].time = start;
-            inKeyPoints.Insert(0, cameraMove.scaleKeyPoints[firstPointIndex]);
+            firstPointIndex = inKeyPoints.Count > 0 ? cameraMove.scaleKeyPoints.IndexOf(inKeyPoints[0]) : 1;
+            if (firstPointIndex - 1 >= 0)
+            {
+                if (firstPointIndex - 1 >= 0)
+                {
+                    cameraMove.scaleKeyPoints[firstPointIndex - 1].time = start;
+                }
+                if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
+                {
+                    inKeyPoints.Insert(0, cameraMove.scaleKeyPoints[firstPointIndex - 1]);
+                }
+            }
 
             cameraMove.scaleKeyPoints = inKeyPoints;
 
