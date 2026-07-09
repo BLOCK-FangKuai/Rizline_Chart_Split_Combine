@@ -291,13 +291,16 @@ namespace Rizline_Chart
                 }
                 else
                 {
-                    if (points[0].time < lineEnd)
+                    if (points[0].time <= lineEnd)
                     {
                         inLinePoints.Add(points[0]);
                         if (points[1].time > lineEnd)
                         {
-                            points[1].time = lineEnd;
-                            inLinePoints.Add(points[1]);
+                            if (points[0].time != lineEnd)
+                            {
+                                points[1].time = lineEnd;
+                                inLinePoints.Add(points[1]);
+                            }
                             break;
                         }
                         else
@@ -419,7 +422,35 @@ namespace Rizline_Chart
                     inKeyPoints.Insert(0, cameraMove.xPositionKeyPoints[firstPointIndex - 1]);
                 }
             }
-
+            if (settings.finalCameraMoveEaseSetOne)
+            {
+                inKeyPoints[^1].easeType = EaseType.one;
+            }
+            else
+            {
+                float offset = settings.cameraMoveOffset;
+                if (offset > 0)
+                {
+                    //将最后的超界的关键帧节点的时间设置为边界值
+                    int finalPointIndex = inKeyPoints.Count > 0 ?
+                        cameraMove.xPositionKeyPoints.IndexOf(inKeyPoints[^1]) : cameraMove.xPositionKeyPoints.Count - 2;
+                    if (finalPointIndex + 1 < cameraMove.xPositionKeyPoints.Count)
+                    {
+                        if (cameraMove.xPositionKeyPoints[finalPointIndex + 1].time > end)
+                        {
+                            cameraMove.xPositionKeyPoints[finalPointIndex + 1].time = end;
+                        }
+                        if (inKeyPoints.Count == 0 || inKeyPoints[^1].time != end)
+                        {
+                            inKeyPoints.Add(cameraMove.xPositionKeyPoints[finalPointIndex + 1]);
+                        }
+                    }
+                    if (inKeyPoints.Count > 0 && inKeyPoints[^1].time == end)
+                    {
+                        inKeyPoints[^1].time -= offset;
+                    }
+                }
+            }
             cameraMove.xPositionKeyPoints = inKeyPoints;
 
             inKeyPoints = cameraMove.scaleKeyPoints.FindAll(point => point.time > start && point.time <= end);
@@ -435,7 +466,40 @@ namespace Rizline_Chart
                     inKeyPoints.Insert(0, cameraMove.scaleKeyPoints[firstPointIndex - 1]);
                 }
             }
-
+            if (settings.finalCameraMoveEaseSetOne)
+            {
+                inKeyPoints[^1].easeType = EaseType.one;
+            }
+            else
+            {
+                float offset = settings.cameraMoveOffset;
+                if (offset > 0)
+                {
+                    //将最后的超界的关键帧节点的时间设置为边界值
+                    int finalPointIndex = inKeyPoints.Count > 0 ?
+                        cameraMove.scaleKeyPoints.IndexOf(inKeyPoints[^1]) : cameraMove.scaleKeyPoints.Count - 2;
+                    if (finalPointIndex + 1 < cameraMove.scaleKeyPoints.Count)
+                    {
+                        if (cameraMove.scaleKeyPoints[finalPointIndex + 1].time > end)
+                        {
+                            cameraMove.scaleKeyPoints[finalPointIndex + 1].time = end;
+                        }
+                        if (inKeyPoints.Count == 0 || inKeyPoints[^1].time != end)
+                        {
+                            inKeyPoints.Add(cameraMove.scaleKeyPoints[finalPointIndex + 1]);
+                        }
+                    }
+                    else if (cameraMove.scaleKeyPoints.Count == 1)
+                    {
+                        inKeyPoints.Add(cameraMove.scaleKeyPoints[0]);
+                        inKeyPoints[^1].time = end;
+                    }
+                    if (inKeyPoints.Count > 0 && inKeyPoints[^1].time == end)
+                    {
+                        inKeyPoints[^1].time -= offset;
+                    }
+                }
+            }
             cameraMove.scaleKeyPoints = inKeyPoints;
 
             return cameraMove;
