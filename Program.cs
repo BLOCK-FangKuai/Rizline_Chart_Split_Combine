@@ -22,6 +22,7 @@ namespace Rizline_Chart
             {
                 try
                 {
+                    FullyAutomatic();
                     while (true)
                     {
                         directory = PyInput("请输入json文件目录：", "charts");
@@ -45,19 +46,13 @@ namespace Rizline_Chart
                     if (YNChoose("是否使用自动导入？（Y/N）"))
                     {
                         AutoImport();
-                        //PyPrint(JsonConvert.SerializeObject(resultChart, serializerSettings));
                     }
                     else
                     {
                         ManualImport();
                     }
-
-
-                    // D:\Codes\Rizline_Chart\Test\Pastel Lines
-
-                    //string json = File.ReadAllText("D:\\Codes\\Rizline_Chart\\Test\\Research_Json.json");
-                    //Chart? chart = JsonConvert.DeserializeObject<Chart>(json);
                     Pause();
+                    Console.Clear();
                 }
                 catch (Exception e)
                 {
@@ -65,6 +60,35 @@ namespace Rizline_Chart
                     Pause();
                     Console.Clear();
                 }
+            }
+        }
+
+        private static void FullyAutomatic()
+        {
+            string settingPath = Path.Combine(Directory.GetCurrentDirectory(), "settings.json");
+            if (!Path.Exists(settingPath))
+            {
+                return;
+            }
+            try
+            {
+                string json = File.ReadAllText(settingPath);
+                settings = JsonConvert.DeserializeObject<Settings>(json);
+                if (!settings.automatic)
+                {
+                    return;
+                }
+                if (!settings.Check())
+                {
+                    throw new Exception($"配置文件参数不正确：{settingPath}");
+                }
+                PyPrint("已启用全自动模式，程序将自动导入当前目录下的谱面文件并输出结果谱面文件");
+                directory = Directory.GetCurrentDirectory();
+                AutoImport();
+            }
+            catch
+            {
+                return;
             }
         }
 
@@ -78,7 +102,12 @@ namespace Rizline_Chart
             settings.files = chartFiles;
             if (!settings.Check())
             {
-                PyPrint("文件夹内谱面文件数目m与配置文件的时间切割点的数量n不对应：m≠n+1");
+                PyPrint("文件夹内谱面文件数目m与配置文件的时间分割点的数量n不对应：m≠n+1");
+                for (int i = 0; i < settings.splitTimes.Count; i++)
+                {
+                    PyPrint($"[{i + 1}] {settings.splitTimes[i]}");
+                }
+                PyPrint("----------------------------------------");
                 for (int i = 0; i < settings.files.Count; i++)
                 {
                     PyPrint($"[{i + 1}] {settings.files[i]}");
@@ -116,7 +145,7 @@ namespace Rizline_Chart
 
         private static void GetBaseChart()
         {
-            string baseChartPath = Path.Combine(directory, $"{settings.baseChartName}.json");
+            string baseChartPath = Path.Combine(directory, $"{settings.baseChartName}");
             if (filePaths.Contains(baseChartPath))
             {
                 try
@@ -359,20 +388,8 @@ namespace Rizline_Chart
 
             //截取在指定时间内的关键帧节点，将最后的超界的关键帧节点的时间设置为边界值
             List<KeyPoint> inKeyPoints = canvasMove.xPositionKeyPoints.FindAll(point => point.time <= end);
-            //int firstPointIndex = inKeyPoints.Count > 0 ? canvasMove.xPositionKeyPoints.IndexOf(inKeyPoints[0]) : 1;
             int finalPointIndex = inKeyPoints.Count > 0 ?
                 canvasMove.xPositionKeyPoints.IndexOf(inKeyPoints[^1]) : canvasMove.xPositionKeyPoints.Count - 2;
-            /*if (firstPointIndex - 1 >= 0)
-            {
-                if (canvasMove.xPositionKeyPoints[firstPointIndex - 1].time < start)
-                {
-                    canvasMove.xPositionKeyPoints[firstPointIndex - 1].time = start;
-                }
-                if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
-                {
-                    inKeyPoints.Insert(0, canvasMove.xPositionKeyPoints[firstPointIndex - 1]);
-                }
-            }*/
             if (finalPointIndex + 1 < canvasMove.xPositionKeyPoints.Count)
             {
                 if (canvasMove.xPositionKeyPoints[finalPointIndex + 1].time > end)
@@ -388,19 +405,6 @@ namespace Rizline_Chart
             canvasMove.xPositionKeyPoints = inKeyPoints;
 
             inKeyPoints = canvasMove.speedKeyPoints.FindAll(point =>point.time <= end);
-            /*firstPointIndex = inKeyPoints.Count > 0 ? canvasMove.speedKeyPoints.IndexOf(inKeyPoints[0]) : 1;
-            if (firstPointIndex - 1 >= 0)
-            {
-                if (firstPointIndex - 1 >= 0 && inKeyPoints[0].time != start)
-                {
-                    canvasMove.speedKeyPoints[firstPointIndex - 1].time = start;
-                }
-                if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
-                {
-                    inKeyPoints.Insert(0, canvasMove.speedKeyPoints[firstPointIndex - 1]);
-                }
-            }*/
-
             canvasMove.speedKeyPoints = inKeyPoints;
 
             return canvasMove;
@@ -537,7 +541,7 @@ namespace Rizline_Chart
                     {
                         while (true)
                         {
-                            string resultName = PyInput("请输入要输出的谱面文件的文件名：");
+                            string resultName = PyInput("请输入要输出的谱面文件的文件名（无需后缀）：");
                             outputPath = Path.Combine(directory, $"{resultName}.json");
                             if (!File.Exists(outputPath))
                             {
@@ -563,7 +567,7 @@ namespace Rizline_Chart
                     {
                         while (true)
                         {
-                            string resultName = PyInput("请输入要输出的谱面文件的文件名：");
+                            string resultName = PyInput("请输入要输出的谱面文件的文件名（无需后缀）：");
                             outputPath = Path.Combine(directory, $"{resultName}.json");
                             if (TryWrite(outputPath, json))
                             {
@@ -579,7 +583,127 @@ namespace Rizline_Chart
 
         private static void ManualImport()
         {
+            // 重置配置
+            settings.files = new();
+            settings.splitTimes = new();
+            filePaths = GetAllFiles(directory);
 
+            // 第0步：输入基础谱面文件名
+            while (true)
+            {
+                string baseName = PyInput("请输入基础谱面文件名（需带后缀）：");
+                if (string.IsNullOrWhiteSpace(baseName))
+                {
+                    HandleEmptyInput("退出手动导入？（Y/N）");
+                }
+                string basePath = Path.Combine(directory, $"{baseName}");
+                if (!File.Exists(basePath))
+                {
+                    PyPrint($"文件不存在：{basePath}，请重新输入");
+                    continue;
+                }
+                settings.baseChartName = baseName;
+                break;
+            }
+
+            // 主循环：交替输入谱面文件名和分割时间
+            bool isNextFile = true;     // true=下一步输入文件名，false=下一步输入时间
+            bool finished = false;      // 是否结束输入
+
+            while (!finished)
+            {
+                if (isNextFile)
+                {
+                    // 输入文件名
+                    string fileName = PyInput("请输入谱面文件名（需带后缀）：");
+                    if (string.IsNullOrWhiteSpace(fileName))
+                    {
+                        // 空输入处理
+                        if (HandleEmptyInput("结束输入？（Y/N）"))
+                        {
+                            if (settings.splitTimes.Count > 0)
+                            {
+                                //当输入了时间但没有输入文件名时，删除最后一个分割时间
+                                settings.splitTimes.RemoveAt(settings.splitTimes.Count - 1);
+                            }
+                            finished = true;
+                        }
+                        continue;
+                    }
+
+                    string filePath = Path.Combine(directory, fileName);
+                    if (!File.Exists(filePath))
+                    {
+                        PyPrint($"文件不存在：{filePath}，请重新输入");
+                        continue;
+                    }
+
+                    settings.files.Add(fileName);
+                    isNextFile = false;
+
+                }
+                else
+                {
+                    // 输入切割时间
+                    if (settings.files.Count >= 2)
+                    {
+                        Console.Clear();
+                        PrintProgress();
+                    }
+
+                    string timeStr = PyInput("请输入切割时间（节拍）：");
+                    if (string.IsNullOrWhiteSpace(timeStr))
+                    {
+                        if (HandleEmptyInput("结束输入？（Y/N）"))
+                        {
+                            finished = true;
+                        }
+                        continue;
+                    }
+
+                    if (!float.TryParse(timeStr, out float splitTime) || splitTime <= 0)
+                    {
+                        PyPrint("请输入有效的正数");
+                        continue;
+                    }
+
+                    settings.splitTimes.Add(splitTime);
+                    isNextFile = true;
+                }
+            }
+
+            GetBaseChart();
+            CombineCharts();
+            OutputChart();
+        }
+
+        private static void PrintProgress()
+        {
+            for (int i = 0; i < settings.files.Count; i++)
+            {
+                PyPrint(settings.files[i]);
+                if (i < settings.splitTimes.Count)
+                {
+                    PyPrint($"--- {settings.splitTimes[i]} ---");
+                }
+            }
+            PyPrint("");
+        }
+
+        private static bool HandleEmptyInput(string message)
+        {
+            if (!YNChoose($"是否{message}"))
+            {
+                return false;
+            }
+
+            // 二次确认
+            if (YNChoose($"确定{message}"))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private static float CalculateFloorPosition(CanvasMove canvasMove, float time)

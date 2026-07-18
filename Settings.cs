@@ -13,6 +13,7 @@ namespace Rizline_Chart
         public List<string> files = new();
         public string resultName = "result";
         public bool autoOverWritten = false;
+        public bool automatic = false;
 
         public bool Check()
         {

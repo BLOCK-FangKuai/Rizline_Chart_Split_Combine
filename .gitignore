@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 #Test
 [Tt]est*/
+
+#Codebuddy
+.codebuddy/

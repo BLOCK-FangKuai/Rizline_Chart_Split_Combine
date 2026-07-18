@@ -17,7 +17,7 @@ namespace Rizline_Chart
         public List<Line> lines = new();
         public List<CanvasMove> canvasMoves = new();
         public CameraMove cameraMove = new();
-        public Dictionary<string, string>? __db;
+        public Dictionary<string, string> __db = new();
     }
 
     public class Theme
