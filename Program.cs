@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using System.Xml.Linq;
 
 namespace Rizline_Chart
 {
@@ -236,7 +235,7 @@ namespace Rizline_Chart
                 //如果编号大小相同，则按照编号后面的名称排序
                 if (numSort == 0)
                 {
-                    int nameSort = name1.Split(".", 1)[1].CompareTo(name2.Split(".", 1)[1]);
+                    int nameSort = name1.Split(".", 2)[1].CompareTo(name2.Split(".", 2)[1]);
                     return nameSort;
                 }
                 return numSort;
@@ -459,17 +458,16 @@ namespace Rizline_Chart
 
             inKeyPoints = cameraMove.scaleKeyPoints.FindAll(point => point.time > start && point.time <= end);
             firstPointIndex = inKeyPoints.Count > 0 ? cameraMove.scaleKeyPoints.IndexOf(inKeyPoints[0]) : 1;
+
             if (firstPointIndex - 1 >= 0)
             {
-                if (firstPointIndex - 1 >= 0)
-                {
-                    cameraMove.scaleKeyPoints[firstPointIndex - 1].time = start;
-                }
-                if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
-                {
-                    inKeyPoints.Insert(0, cameraMove.scaleKeyPoints[firstPointIndex - 1]);
-                }
+                cameraMove.scaleKeyPoints[firstPointIndex - 1].time = start;
             }
+            if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
+            {
+                inKeyPoints.Insert(0, cameraMove.scaleKeyPoints[firstPointIndex - 1]);
+            }
+            
             if (settings.finalCameraMoveEaseSetOne)
             {
                 inKeyPoints[^1].easeType = EaseType.one;
@@ -583,23 +581,22 @@ namespace Rizline_Chart
 
         private static void ManualImport()
         {
-            // 重置配置
             settings.files = new();
             settings.splitTimes = new();
             filePaths = GetAllFiles(directory);
 
-            // 第0步：输入基础谱面文件名
+            // 输入基础谱面文件名
             while (true)
             {
                 string baseName = PyInput("请输入基础谱面文件名（需带后缀）：");
-                if (string.IsNullOrWhiteSpace(baseName))
+                if (string.Equals(baseName, ""))
                 {
                     HandleEmptyInput("退出手动导入？（Y/N）");
                 }
                 string basePath = Path.Combine(directory, $"{baseName}");
                 if (!File.Exists(basePath))
                 {
-                    PyPrint($"文件不存在：{basePath}，请重新输入");
+                    PyPrint($"未找到基础谱面文件：{basePath}，请重新输入");
                     continue;
                 }
                 settings.baseChartName = baseName;
@@ -608,7 +605,7 @@ namespace Rizline_Chart
 
             // 主循环：交替输入谱面文件名和分割时间
             bool isNextFile = true;     // true=下一步输入文件名，false=下一步输入时间
-            bool finished = false;      // 是否结束输入
+            bool finished = false;
 
             while (!finished)
             {
@@ -616,9 +613,8 @@ namespace Rizline_Chart
                 {
                     // 输入文件名
                     string fileName = PyInput("请输入谱面文件名（需带后缀）：");
-                    if (string.IsNullOrWhiteSpace(fileName))
+                    if (string.Equals(fileName, ""))
                     {
-                        // 空输入处理
                         if (HandleEmptyInput("结束输入？（Y/N）"))
                         {
                             if (settings.splitTimes.Count > 0)
@@ -634,8 +630,21 @@ namespace Rizline_Chart
                     string filePath = Path.Combine(directory, fileName);
                     if (!File.Exists(filePath))
                     {
-                        PyPrint($"文件不存在：{filePath}，请重新输入");
+                        PyPrint($"未找到谱面文件：{filePath}，请重新输入");
                         continue;
+                    }
+                    else
+                    {
+                        string json = File.ReadAllText(filePath);
+                        try
+                        {
+                            JsonConvert.DeserializeObject<Chart>(json);
+                        }
+                        catch
+                        {
+                            PyPrint($"谱面文件格式不正确：{filePath}");
+                            continue;
+                        }
                     }
 
                     settings.files.Add(fileName);
@@ -652,7 +661,7 @@ namespace Rizline_Chart
                     }
 
                     string timeStr = PyInput("请输入切割时间（节拍）：");
-                    if (string.IsNullOrWhiteSpace(timeStr))
+                    if (string.Equals(timeStr, ""))
                     {
                         if (HandleEmptyInput("结束输入？（Y/N）"))
                         {
@@ -684,7 +693,7 @@ namespace Rizline_Chart
                 PyPrint(settings.files[i]);
                 if (i < settings.splitTimes.Count)
                 {
-                    PyPrint($"--- {settings.splitTimes[i]} ---");
+                    PyPrint($"{settings.splitTimes[i]}------------------------------");
                 }
             }
             PyPrint("");
@@ -755,11 +764,11 @@ namespace Rizline_Chart
             while (true)
             {
                 var choose = Console.ReadKey(true);
-                if ($"{choose.KeyChar}".ToUpper().Equals("Y"))
+                if (char.ToUpperInvariant(choose.KeyChar) == 'Y')
                 {
                     return true;
                 }
-                else if ($"{choose.KeyChar}".ToUpper().Equals("N"))
+                else if (char.ToUpperInvariant(choose.KeyChar) == 'N')
                 {
                     return false;
                 }

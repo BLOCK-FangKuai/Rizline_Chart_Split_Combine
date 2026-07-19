@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Rizline_Chart
+﻿namespace Rizline_Chart
 {
     public class Chart
     {
@@ -71,7 +65,7 @@ namespace Rizline_Chart
         public float floorPosition;
         /// <summary>
         /// Hold音符特有的参数
-        /// 第一个数表示结束的时间
+        /// 第一个数表示结束的节拍
         /// 第二个数表示Hold尾所在画布的index
         /// 第三个数表示Hold尾在所在画布的floorPosition
         /// </summary>

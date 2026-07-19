@@ -1,6 +1,4 @@
-﻿using System.Collections;
-
-namespace Rizline_Chart
+﻿namespace Rizline_Chart
 {
     public class Settings
     {
@@ -8,7 +6,7 @@ namespace Rizline_Chart
         public List<float> splitTimes = new();
         public float overlapTime = 4;
         public bool finalCameraMoveEaseSetOne = false;
-        public float cameraMoveOffset = 0;
+        public float cameraMoveOffset = 1 / 64f;
         public string baseChartName = "base";
         public List<string> files = new();
         public string resultName = "result";
@@ -21,7 +19,7 @@ namespace Rizline_Chart
             {
                 overlapTime = 0;
             }
-            if (cameraMoveOffset > 1 / 64f)
+            if (cameraMoveOffset > 1 / 64f || cameraMoveOffset < 0)
             {
                 cameraMoveOffset = 1 / 64f;
             }
