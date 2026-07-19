@@ -13,18 +13,39 @@
         public bool autoOverWritten = false;
         public bool automatic = false;
 
-        public bool Check()
+        public bool Check(out string message)
         {
+            message = string.Empty;
+            if (splitTimes.Distinct().ToList().Count < splitTimes.Count)
+            {
+                message = "splitTimes中有重复元素";
+                return false;
+            }
+            for (int i = 0; i < splitTimes.Count - 1; i++)
+            {
+                if (splitTimes[i] >= splitTimes[i + 1])
+                {
+                    message = "splitTimes必须从小到大排序";
+                    return false;
+                }
+            }
             if (overlapTime < 0)
             {
-                overlapTime = 0;
+                message = "overlapTime不可小于0";
+                return false;
             }
-            if (cameraMoveOffset > 1 / 64f || cameraMoveOffset < 0)
+            if (cameraMoveOffset > 1 / 64f || cameraMoveOffset <= 0)
             {
-                cameraMoveOffset = 1 / 64f;
+                message = "cameraMoveOffset值的范围为(0, 0.015625]";
+                return false;
             }
-            splitTimes.Sort();
-            return IsFileEmpty() || splitTimes.Count + 1 == files.Count;
+            if (IsFileEmpty())
+            {
+                message = "files为空";
+                return false;
+            }
+            message = "splitTimes的数量+1须等于files的数量";
+            return splitTimes.Count + 1 == files.Count;
         }
 
         public bool IsFileEmpty()

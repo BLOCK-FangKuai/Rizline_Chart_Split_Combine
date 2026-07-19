@@ -4,10 +4,11 @@ namespace Rizline_Chart
 {
     public class Program
     {
-        static string directory = "";
+        static string directory = string.Empty;
         static List<string> filePaths = new();
         static Settings settings = new();
         static Chart resultChart = new();
+        static bool isFullyAutomaticFinished = false;
 
         static JsonSerializerSettings serializerSettings = new()
         {
@@ -19,12 +20,19 @@ namespace Rizline_Chart
         {
             while (true)
             {
+                Init();
                 try
                 {
-                    FullyAutomatic();
+                    if (!isFullyAutomaticFinished)
+                    {
+                        FullyAutomatic();
+                    }
                     while (true)
                     {
-                        directory = PyInput("请输入json文件目录：", "charts");
+                        if (string.IsNullOrEmpty(directory))
+                        {
+                            directory = PyInput("请输入json文件目录：", "charts");
+                        }
                         if (!Directory.Exists(directory))
                         {
                             directory = Path.Combine(Directory.GetCurrentDirectory(), directory);
@@ -59,6 +67,7 @@ namespace Rizline_Chart
                     Pause();
                     Console.Clear();
                 }
+                directory = string.Empty;
             }
         }
 
@@ -71,22 +80,29 @@ namespace Rizline_Chart
             }
             try
             {
+                PyPrint($"当前目录下读取到配置文件：{settingPath}");
                 string json = File.ReadAllText(settingPath);
                 settings = JsonConvert.DeserializeObject<Settings>(json);
                 if (!settings.automatic)
                 {
+                    if (YNChoose("是否选择当前目录为谱面文件目录？（Y/N）"))
+                    {
+                        directory = Directory.GetCurrentDirectory();
+                    }
                     return;
                 }
-                if (!settings.Check())
+                if (!settings.Check(out string message))
                 {
-                    throw new Exception($"配置文件参数不正确：{settingPath}");
+                    throw new Exception($"配置文件参数不正确：{settingPath}，原因：{message}");
                 }
                 PyPrint("已启用全自动模式，程序将自动导入当前目录下的谱面文件并输出结果谱面文件");
                 directory = Directory.GetCurrentDirectory();
                 AutoImport();
+                isFullyAutomaticFinished = true;
             }
-            catch
+            catch (Exception e)
             {
+                PyPrint($"配置文件解析失败：{e.Message}");
                 return;
             }
         }
@@ -99,7 +115,7 @@ namespace Rizline_Chart
             List<string> chartFiles = GetChartFiles();
             SortChartFiles(chartFiles);
             settings.files = chartFiles;
-            if (!settings.Check())
+            if (!settings.Check(out _))
             {
                 PyPrint("文件夹内谱面文件数目m与配置文件的时间分割点的数量n不对应：m≠n+1");
                 for (int i = 0; i < settings.splitTimes.Count; i++)
@@ -126,14 +142,14 @@ namespace Rizline_Chart
                 {
                     string json = File.ReadAllText(settingPath);
                     settings = JsonConvert.DeserializeObject<Settings>(json);
-                    if (!settings.Check())
+                    if (!settings.Check(out string message))
                     {
-                        throw new Exception($"配置文件参数不正确：{settingPath}");
+                        throw new Exception($"配置文件参数不正确：{settingPath}，原因：{message}");
                     }
                 }
-                catch
+                catch (Exception e)
                 {
-                    throw;
+                    throw new Exception($"配置文件解析失败：{e.Message}");
                 }
             }
             else
@@ -144,25 +160,18 @@ namespace Rizline_Chart
 
         private static void GetBaseChart()
         {
-            string baseChartPath = Path.Combine(directory, $"{settings.baseChartName}");
+            string baseChartPath = Path.Combine(directory, settings.baseChartName);
             if (filePaths.Contains(baseChartPath))
             {
-                try
-                {
-                    string json = File.ReadAllText(baseChartPath);
-                    Chart baseChart = JsonConvert.DeserializeObject<Chart>(json);
+                string json = File.ReadAllText(baseChartPath);
+                Chart baseChart = JsonConvert.DeserializeObject<Chart>(json);
 
-                    resultChart.fileVersion = baseChart.fileVersion;
-                    resultChart.chartDelayMs = baseChart.chartDelayMs;
-                    resultChart.themes = baseChart.themes;
-                    resultChart.challengeTimes = baseChart.challengeTimes;
-                    resultChart.bPM = baseChart.bPM;
-                    resultChart.bpmShifts = baseChart.bpmShifts;
-                }
-                catch
-                {
-                    throw;
-                }
+                resultChart.fileVersion = baseChart.fileVersion;
+                resultChart.chartDelayMs = baseChart.chartDelayMs;
+                resultChart.themes = baseChart.themes;
+                resultChart.challengeTimes = baseChart.challengeTimes;
+                resultChart.bPM = baseChart.bPM;
+                resultChart.bpmShifts = baseChart.bpmShifts;
             }
             else
             {
@@ -193,7 +202,9 @@ namespace Rizline_Chart
                 {
                     string fileName = Path.GetFileName(filePath);
                     //文件名带有数字编号且后缀为.json的计为谱面文件
-                    bool isChartFile = int.TryParse(fileName.Split(".")[0], out _) && Path.GetExtension(filePath).ToLower().Equals(".json");
+                    bool isChartFile = int.TryParse(fileName.Split(".")[0], out _)
+                        && Path.GetExtension(filePath).ToLower().Equals(".json")
+                        && !string.Equals(fileName, settings.baseChartName);
                     if (isChartFile)
                     {
                         chartFiles.Add(fileName);
@@ -230,7 +241,6 @@ namespace Rizline_Chart
             chartFiles.Sort((name1, name2) =>
             {
                 //根据编号大小排序
-                var g = name2.Split(".", 2);
                 int numSort = int.Parse(name1.Split(".", 2)[0]).CompareTo(int.Parse(name2.Split(".", 2)[0]));
                 //如果编号大小相同，则按照编号后面的名称排序
                 if (numSort == 0)
@@ -581,15 +591,13 @@ namespace Rizline_Chart
 
         private static void ManualImport()
         {
-            settings.files = new();
-            settings.splitTimes = new();
             filePaths = GetAllFiles(directory);
 
             // 输入基础谱面文件名
             while (true)
             {
                 string baseName = PyInput("请输入基础谱面文件名（需带后缀）：");
-                if (string.Equals(baseName, ""))
+                if (string.Equals(baseName, string.Empty))
                 {
                     HandleEmptyInput("退出手动导入？（Y/N）");
                 }
@@ -613,7 +621,7 @@ namespace Rizline_Chart
                 {
                     // 输入文件名
                     string fileName = PyInput("请输入谱面文件名（需带后缀）：");
-                    if (string.Equals(fileName, ""))
+                    if (string.Equals(fileName, string.Empty))
                     {
                         if (HandleEmptyInput("结束输入？（Y/N）"))
                         {
@@ -621,6 +629,15 @@ namespace Rizline_Chart
                             {
                                 //当输入了时间但没有输入文件名时，删除最后一个分割时间
                                 settings.splitTimes.RemoveAt(settings.splitTimes.Count - 1);
+                            }
+                            if (settings.files.Count == 0)
+                            {
+                                PyPrint("未选择任何文件");
+                                if (HandleEmptyInput("返回至最开始？（Y/N）"))
+                                {
+                                    return;
+                                }
+                                continue;
                             }
                             finished = true;
                         }
@@ -661,7 +678,7 @@ namespace Rizline_Chart
                     }
 
                     string timeStr = PyInput("请输入切割时间（节拍）：");
-                    if (string.Equals(timeStr, ""))
+                    if (string.Equals(timeStr, string.Empty))
                     {
                         if (HandleEmptyInput("结束输入？（Y/N）"))
                         {
@@ -670,9 +687,12 @@ namespace Rizline_Chart
                         continue;
                     }
 
-                    if (!float.TryParse(timeStr, out float splitTime) || splitTime <= 0)
+                    if (!float.TryParse(timeStr, out float splitTime) || splitTime < 0
+                        || (settings.splitTimes.Count > 0 && splitTime <= settings.splitTimes[^1]))
                     {
-                        PyPrint("请输入有效的正数");
+                        PyPrint($"请输入有效的数值，范围" +
+                            $"{(settings.splitTimes.Count > 0 ? "(" : "[")}" +
+                            $"{(settings.splitTimes.Count > 0 ? settings.splitTimes[^1] : "0")}, （曲目总节拍数）]");
                         continue;
                     }
 
@@ -696,7 +716,7 @@ namespace Rizline_Chart
                     PyPrint($"{settings.splitTimes[i]}------------------------------");
                 }
             }
-            PyPrint("");
+            PyPrint(string.Empty);
         }
 
         private static bool HandleEmptyInput(string message)
@@ -739,6 +759,14 @@ namespace Rizline_Chart
                 }
             }
             return floorPosition;
+        }
+
+        private static void Init()
+        {
+            directory = string.Empty;
+            filePaths = new();
+            settings = new();
+            resultChart = new();
         }
 
         private static string PyInput(string message = "", string @default = "")
