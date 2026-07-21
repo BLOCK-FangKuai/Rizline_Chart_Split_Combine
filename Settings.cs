@@ -15,7 +15,6 @@
 
         public bool Check(out string message)
         {
-            message = string.Empty;
             if (splitTimes.Distinct().ToList().Count < splitTimes.Count)
             {
                 message = "splitTimes中有重复元素";
