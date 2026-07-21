@@ -7,7 +7,7 @@
         public float overlapTime = 4;
         public bool finalCameraMoveEaseSetOne = false;
         public float cameraMoveOffset = 1 / 64f;
-        public string baseChartName = "base";
+        public string baseChartName = "base.json";
         public List<string> files = new();
         public string resultName = "result";
         public bool autoOverWritten = false;

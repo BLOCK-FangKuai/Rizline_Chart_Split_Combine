@@ -16,7 +16,7 @@ namespace Rizline_Chart
             NullValueHandling = NullValueHandling.Ignore
         };
 
-        public static void Main(string[] args)
+        public static void Main()
         {
             while (true)
             {
@@ -41,6 +41,7 @@ namespace Rizline_Chart
                                 break;
                             }
                             Pause($"目录{directory}不存在，请重新输入");
+                            directory = string.Empty;
                         }
                         else
                         {
@@ -93,16 +94,27 @@ namespace Rizline_Chart
                 }
                 if (!settings.Check(out string message))
                 {
-                    throw new Exception($"配置文件参数不正确：{settingPath}，原因：{message}");
+                    PyPrint($"配置文件参数不正确：{settingPath}，原因：{message}");
+                    if (YNChoose("是否选择当前目录为谱面文件目录？（Y/N）"))
+                    {
+                        directory = Directory.GetCurrentDirectory();
+                    }
+                    return;
                 }
                 PyPrint("已启用全自动模式，程序将自动导入当前目录下的谱面文件并输出结果谱面文件");
                 directory = Directory.GetCurrentDirectory();
                 AutoImport();
+                Init();
                 isFullyAutomaticFinished = true;
             }
             catch (Exception e)
             {
-                PyPrint($"配置文件解析失败：{e.Message}");
+                PyPrint(e.Message);
+                if (YNChoose("是否选择当前目录为谱面文件目录？（Y/N）"))
+                {
+                    directory = Directory.GetCurrentDirectory();
+                }
+                Console.Clear();
                 return;
             }
         }
@@ -202,9 +214,7 @@ namespace Rizline_Chart
                 {
                     string fileName = Path.GetFileName(filePath);
                     //文件名带有数字编号且后缀为.json的计为谱面文件
-                    bool isChartFile = int.TryParse(fileName.Split(".")[0], out _)
-                        && Path.GetExtension(filePath).ToLower().Equals(".json")
-                        && !string.Equals(fileName, settings.baseChartName);
+                    bool isChartFile = int.TryParse(fileName.Split(".")[0], out _) && Path.GetExtension(filePath).ToLower().Equals(".json");
                     if (isChartFile)
                     {
                         chartFiles.Add(fileName);
@@ -428,11 +438,17 @@ namespace Rizline_Chart
             {
                 if (cameraMove.xPositionKeyPoints[firstPointIndex - 1].time < start)
                 {
-                    cameraMove.xPositionKeyPoints[firstPointIndex - 1].time = start;
-                }
-                if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
-                {
-                    inKeyPoints.Insert(0, cameraMove.xPositionKeyPoints[firstPointIndex - 1]);
+                    KeyPoint newPoint = new()
+                    {
+                        time = start,
+                        value = cameraMove.xPositionKeyPoints[firstPointIndex - 1].value,
+                        easeType = cameraMove.xPositionKeyPoints[firstPointIndex - 1].easeType,
+                        floorPosition = cameraMove.xPositionKeyPoints[firstPointIndex - 1].floorPosition
+                    };
+                    if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
+                    {
+                        inKeyPoints.Insert(0, newPoint);
+                    }
                 }
             }
             if (settings.finalCameraMoveEaseSetOne)
@@ -442,40 +458,50 @@ namespace Rizline_Chart
             else
             {
                 float offset = settings.cameraMoveOffset;
-                if (offset > 0)
+
+                //将最后的超界的关键帧节点的时间设置为边界值
+                int finalPointIndex = inKeyPoints.Count > 0 ?
+                    cameraMove.xPositionKeyPoints.IndexOf(inKeyPoints[^1]) : cameraMove.xPositionKeyPoints.Count - 2;
+                if (finalPointIndex + 1 < cameraMove.xPositionKeyPoints.Count)
                 {
-                    //将最后的超界的关键帧节点的时间设置为边界值
-                    int finalPointIndex = inKeyPoints.Count > 0 ?
-                        cameraMove.xPositionKeyPoints.IndexOf(inKeyPoints[^1]) : cameraMove.xPositionKeyPoints.Count - 2;
-                    if (finalPointIndex + 1 < cameraMove.xPositionKeyPoints.Count)
+                    if (cameraMove.xPositionKeyPoints[finalPointIndex + 1].time > end)
                     {
-                        if (cameraMove.xPositionKeyPoints[finalPointIndex + 1].time > end)
+                        KeyPoint newPoint = new()
                         {
-                            cameraMove.xPositionKeyPoints[finalPointIndex + 1].time = end;
-                        }
+                            time = end,
+                            value = cameraMove.xPositionKeyPoints[finalPointIndex + 1].value,
+                            easeType = cameraMove.xPositionKeyPoints[finalPointIndex + 1].easeType,
+                            floorPosition = cameraMove.xPositionKeyPoints[finalPointIndex + 1].floorPosition
+                        };
                         if (inKeyPoints.Count == 0 || inKeyPoints[^1].time != end)
                         {
-                            inKeyPoints.Add(cameraMove.xPositionKeyPoints[finalPointIndex + 1]);
+                            inKeyPoints.Add(newPoint);
                         }
                     }
-                    if (inKeyPoints.Count > 0 && inKeyPoints[^1].time == end)
-                    {
-                        inKeyPoints[^1].time -= offset;
-                    }
+                }
+                if (inKeyPoints.Count > 0 && inKeyPoints[^1].time == end)
+                {
+                    inKeyPoints[^1].time -= offset;
                 }
             }
             cameraMove.xPositionKeyPoints = inKeyPoints;
 
-            inKeyPoints = cameraMove.scaleKeyPoints.FindAll(point => point.time > start && point.time <= end);
+            inKeyPoints = cameraMove.scaleKeyPoints.FindAll(point => point.time >= start && point.time <= end);
             firstPointIndex = inKeyPoints.Count > 0 ? cameraMove.scaleKeyPoints.IndexOf(inKeyPoints[0]) : 1;
 
             if (firstPointIndex - 1 >= 0)
             {
-                cameraMove.scaleKeyPoints[firstPointIndex - 1].time = start;
-            }
-            if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
-            {
-                inKeyPoints.Insert(0, cameraMove.scaleKeyPoints[firstPointIndex - 1]);
+                KeyPoint newPoint = new()
+                {
+                    time = start,
+                    value = cameraMove.scaleKeyPoints[firstPointIndex - 1].value,
+                    easeType = cameraMove.scaleKeyPoints[firstPointIndex - 1].easeType,
+                    floorPosition = cameraMove.scaleKeyPoints[firstPointIndex - 1].floorPosition
+                };
+                if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
+                {
+                    inKeyPoints.Insert(0, newPoint);
+                }
             }
             
             if (settings.finalCameraMoveEaseSetOne)
@@ -485,32 +511,39 @@ namespace Rizline_Chart
             else
             {
                 float offset = settings.cameraMoveOffset;
-                if (offset > 0)
+
+                //将最后的超界的关键帧节点的时间设置为边界值
+                int finalPointIndex = inKeyPoints.Count > 0 ?
+                    cameraMove.scaleKeyPoints.IndexOf(inKeyPoints[^1]) : cameraMove.scaleKeyPoints.Count - 2;
+                if (finalPointIndex + 1 < cameraMove.scaleKeyPoints.Count)
                 {
-                    //将最后的超界的关键帧节点的时间设置为边界值
-                    int finalPointIndex = inKeyPoints.Count > 0 ?
-                        cameraMove.scaleKeyPoints.IndexOf(inKeyPoints[^1]) : cameraMove.scaleKeyPoints.Count - 2;
-                    if (finalPointIndex + 1 < cameraMove.scaleKeyPoints.Count)
+                    KeyPoint newPoint = new()
                     {
-                        if (cameraMove.scaleKeyPoints[finalPointIndex + 1].time > end)
-                        {
-                            cameraMove.scaleKeyPoints[finalPointIndex + 1].time = end;
-                        }
-                        if (inKeyPoints.Count == 0 || inKeyPoints[^1].time != end)
-                        {
-                            inKeyPoints.Add(cameraMove.scaleKeyPoints[finalPointIndex + 1]);
-                        }
-                    }
-                    else if (cameraMove.scaleKeyPoints.Count == 1)
+                        time = end,
+                        value = cameraMove.scaleKeyPoints[finalPointIndex + 1].value,
+                        easeType = cameraMove.scaleKeyPoints[finalPointIndex + 1].easeType,
+                        floorPosition = cameraMove.scaleKeyPoints[finalPointIndex + 1].floorPosition
+                    };
+                    if (inKeyPoints.Count == 0 || inKeyPoints[^1].time != end)
                     {
-                        inKeyPoints.Add(cameraMove.scaleKeyPoints[0]);
-                        inKeyPoints[^1].time = end;
-                    }
-                    if (inKeyPoints.Count > 0 && inKeyPoints[^1].time == end)
-                    {
-                        inKeyPoints[^1].time -= offset;
+                        inKeyPoints.Add(newPoint);
                     }
                 }
+                else if (cameraMove.scaleKeyPoints.Count == 1)
+                {
+                    inKeyPoints.Add(new()
+                    {
+                        time = end,
+                        value = cameraMove.scaleKeyPoints[0].value,
+                        easeType = cameraMove.scaleKeyPoints[0].easeType,
+                        floorPosition = cameraMove.scaleKeyPoints[0].floorPosition
+                    });
+                }
+                if (inKeyPoints.Count > 0 && inKeyPoints[^1].time == end)
+                {
+                    inKeyPoints[^1].time -= offset;
+                }
+
             }
             cameraMove.scaleKeyPoints = inKeyPoints;
 
@@ -527,7 +560,7 @@ namespace Rizline_Chart
                 {
                     while (true)
                     {
-                        string resultName = PyInput("请输入要输出的谱面文件的文件名：");
+                        string resultName = PyInput("请输入要输出的谱面文件的文件名（无需后缀）：");
                         outputPath = Path.Combine(directory, $"{resultName}.json");
                         if (TryWrite(outputPath, json))
                         {
