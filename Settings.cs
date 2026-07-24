@@ -2,7 +2,6 @@
 {
     public class Settings
     {
-        //此处记录的是节拍
         public List<float> splitTimes = new();
         public float overlapTime = 4;
         public bool finalCameraMoveEaseSetOne = false;

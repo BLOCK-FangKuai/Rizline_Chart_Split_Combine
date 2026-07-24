@@ -380,19 +380,15 @@ namespace Rizline_Chart
                 holds[i].otherInformations[1] += resultChart.canvasMoves.Count;
             }
 
-            //将最后一个hold的结束时间设置为分割结束时间
-            if (holds.Count > 0)
+            //将超界的hold的结束时间设置为分割结束时间
+            for (int i = 0; i < holds.Count; i++)
             {
-                Note finalHold = holds[^1];
-                if (finalHold != null)
+                if (holds[i].otherInformations[0] > end)
                 {
-                    if (finalHold.otherInformations[0] > end)
-                    {
-                        finalHold.otherInformations[0] = end;
-                        float originalCanvasIndex = finalHold.otherInformations[1] - resultChart.canvasMoves.Count;
-                        CanvasMove canvasMove = cameraMoves.Find(canvasMove => canvasMove.index == originalCanvasIndex);
-                        finalHold.otherInformations[2] = CalculateFloorPosition(canvasMove, finalHold.otherInformations[0]);
-                    }
+                    holds[i].otherInformations[0] = end;
+                    float originalCanvasIndex = holds[i].otherInformations[1] - resultChart.canvasMoves.Count;
+                    CanvasMove canvasMove = cameraMoves.Find(canvasMove => canvasMove.index == originalCanvasIndex);
+                    holds[i].otherInformations[2] = CalculateFloorPosition(canvasMove, holds[i].otherInformations[0]);
                 }
             }
             return line;
