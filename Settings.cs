@@ -4,7 +4,7 @@
     {
         public List<float> splitTimes = new();
         public float overlapTime = 0;
-        public bool finalCameraMoveEaseSetOne = false;
+        public bool finalCameraMoveEaseSetZero = false;
         public float cameraMoveOffset = 0.015625f;
         public string baseChartName = "base.json";
         public List<string> files = new();
@@ -32,7 +32,7 @@
                 message = "overlapTime不可小于0";
                 return false;
             }
-            if (cameraMoveOffset > 0.015625 || cameraMoveOffset <= 0)
+            if (!finalCameraMoveEaseSetZero && (cameraMoveOffset > 0.015625 || cameraMoveOffset <= 0))
             {
                 message = "cameraMoveOffset值的范围为(0, 0.015625]";
                 return false;

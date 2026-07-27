@@ -447,9 +447,13 @@ namespace Rizline_Chart
                     }
                 }
             }
-            if (settings.finalCameraMoveEaseSetOne)
+            if (settings.finalCameraMoveEaseSetZero)
             {
-                inKeyPoints[^1].easeType = EaseType.one;
+                if (inKeyPoints[^1].time >= end)
+                {
+                    inKeyPoints.RemoveAt(inKeyPoints.Count - 1);
+                }
+                inKeyPoints[^1].easeType = EaseType.zero;
             }
             else
             {
@@ -500,9 +504,13 @@ namespace Rizline_Chart
                 }
             }
             
-            if (settings.finalCameraMoveEaseSetOne)
+            if (settings.finalCameraMoveEaseSetZero)
             {
-                inKeyPoints[^1].easeType = EaseType.one;
+                if (inKeyPoints[^1].time >= end)
+                {
+                    inKeyPoints.RemoveAt(inKeyPoints.Count - 1);
+                }
+                inKeyPoints[^1].easeType = EaseType.zero;
             }
             else
             {
