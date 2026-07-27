@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Rizline_Chart
+namespace Rizline_Chart_Split_Combine
 {
     public class Program
     {
