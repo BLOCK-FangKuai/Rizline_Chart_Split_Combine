@@ -625,7 +625,7 @@ namespace Rizline_Chart
             // 输入基础谱面文件名
             while (true)
             {
-                string baseName = PyInput("请输入基础谱面文件名（需带后缀）：");
+                string baseName = PyInput("请输入基础谱面文件名（需带后缀），不输入任何内容退出手动导入：");
                 if (string.Equals(baseName, string.Empty))
                 {
                     HandleEmptyInput("退出手动导入？（Y/N）");
@@ -649,7 +649,7 @@ namespace Rizline_Chart
                 if (isNextFile)
                 {
                     // 输入文件名
-                    string fileName = PyInput("请输入谱面文件名（需带后缀）：");
+                    string fileName = PyInput("请输入谱面文件名（需带后缀），不输入任何内容结束输入：");
                     if (string.Equals(fileName, string.Empty))
                     {
                         if (HandleEmptyInput("结束输入？（Y/N）"))
@@ -706,7 +706,7 @@ namespace Rizline_Chart
                         PrintProgress();
                     }
 
-                    string timeStr = PyInput("请输入切割时间（节拍）：");
+                    string timeStr = PyInput("请输入切割时间（节拍），不输入任何内容结束输入：");
                     if (string.Equals(timeStr, string.Empty))
                     {
                         if (HandleEmptyInput("结束输入？（Y/N）"))
