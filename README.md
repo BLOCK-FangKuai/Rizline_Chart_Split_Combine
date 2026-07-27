@@ -16,7 +16,7 @@
 
 ### 1. 下载
 
-从 [Releases](https://github.com/BLOCK-FangKuai/Rizline_Color_Selector/releases) 页面下载最新版本的压缩包。
+从 [Releases](https://github.com/BLOCK-FangKuai/Rizline_Chart_Split_Combine/releases) 页面下载最新版本的压缩包。
 
 ### 2. 运行
 
