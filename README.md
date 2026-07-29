@@ -36,7 +36,7 @@
 2. 读取配置中 `baseChartName` 指定的基础谱面文件，未指定时使用 `base.json`
 3. 获取谱面文件列表：
    - `files` 为空时 → **自动扫描**目录中所有文件名中第一个 `.` 前的部分能被解析为整数的 `.json` 文件，并按编号从小到大排序
-   - `files` 不为空时 → **直接使用** `files` 中指定的文件名列表（保持原始顺序，不排序）
+   - `files` 不为空时 → **直接使用** `files` 中指定的文件名列表（保持原始顺序）
 4. 校验谱面文件数量与 `splitTimes` 数量是否匹配（`files数量 = splitTimes数量 + 1`）
 5. 根据分割时间自动合并并输出结果
 
@@ -64,13 +64,13 @@
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | `splitTimes` | `float[]` | `[]` | 分割时间点（节拍），数量 = 谱面文件数 - 1 |
-| `overlapTime` | `float` | `0` | `linePoints` 和 `canvasMoves` 截取范围的扩展量。使 `linePoints` 的截取区间为 `[start - overlapTime, end + overlapTime]`， `canvasMoves` 的截取区间为 `[0, end + overlapTime]`|
-| `finalCameraMoveEaseSetZero` | `bool` | `false` | 是否移除截取结果中最后一个时间超出段边界的关键帧，并将相邻末帧的缓动类型设为 `zero`。启用后 `cameraMoveOffset` 不生效 |
-| `cameraMoveOffset` | `float` | `0.015625` | 将每段截取结果中最后一个摄像机移动关键帧的时间向前偏移的量。当 `finalCameraMoveEaseSetZero` 的值为 `true` 时此项不生效。范围 `(0, 0.015625]` |
+| `overlapTime` | `float` | `0` | `linePoints` 和 `canvasMoves` 截取范围的扩展量（节拍）。使 `linePoints` 的截取区间为 `[start - overlapTime, end + overlapTime]`， `canvasMoves` 的截取区间为 `[0, end + overlapTime]`|
+| `finalCameraMoveEaseSetZero` | `bool` | `false` | 是否移除截取结果中最后一个时间超出段边界的关键帧，并将相邻末帧的缓动类型设为 `zero`。此项为 `true` 时 `cameraMoveOffset` 不生效 |
+| `cameraMoveOffset` | `float` | `0.015625` | 将每段截取结果中最后一个摄像机移动关键帧的时间向前偏移的量（节拍）。当 `finalCameraMoveEaseSetZero` 的值为 `true` 时此项不生效。范围 `(0, 0.015625]` |
 | `baseChartName` | `string` | `"base.json"` | 基础谱面文件名 |
 | `files` | `string[]` | `[]` | 指定谱面文件名列表，为空时自动扫描文件夹内符合条件的文件 |
 | `resultName` | `string` | `"result"` | 输出谱面文件名（不含后缀） |
-| `autoOverWritten` | `bool` | `false` | 是否自动覆盖已存在的输出文件；若写入失败，会让用户重新输入文件名 |
+| `autoOverWritten` | `bool` | `false` | 是否自动覆盖已存在的输出文件。若写入失败，会让用户重新输入文件名 |
 | `automatic` | `bool` | `false` | 是否启用全自动模式 |
 
 
