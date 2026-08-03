@@ -37,6 +37,11 @@
                 message = "cameraMoveOffset值的范围为(0, 0.015625]";
                 return false;
             }
+            if (IsFileEmpty())
+            {
+                message = "files为空";
+                return false;
+            }
             message = "splitTimes的数量+1须等于files的数量";
             return splitTimes.Count + 1 == files.Count;
         }

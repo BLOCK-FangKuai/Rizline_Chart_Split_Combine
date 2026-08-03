@@ -154,10 +154,6 @@ namespace Rizline_Chart_Split_Combine
                 {
                     string json = File.ReadAllText(settingPath);
                     settings = JsonConvert.DeserializeObject<Settings>(json);
-                    if (!settings.Check(out string message))
-                    {
-                        throw new Exception($"配置文件参数不正确：{settingPath}，原因：{message}");
-                    }
                 }
                 catch (Exception e)
                 {
