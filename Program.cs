@@ -291,7 +291,7 @@ namespace Rizline_Chart_Split_Combine
             {
                 chart.lines[i] = CutLine(chart.lines[i], chart.canvasMoves, start, end, overlap);
             }
-            chart.lines.RemoveAll(line => line.linePoints.Count == 0);
+            chart.lines.RemoveAll(line => line.linePoints.Count < 2);
             for (int i = 0; i < chart.canvasMoves.Count; i++)
             {
                 chart.canvasMoves[i] = CutCanvasMove(chart.canvasMoves[i], start, end, overlap);
