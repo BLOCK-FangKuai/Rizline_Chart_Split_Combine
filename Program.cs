@@ -10,7 +10,7 @@ namespace Rizline_Chart_Split_Combine
         static Chart resultChart = new();
         static bool isFullyAutomaticFinished = false;
 
-        static JsonSerializerSettings serializerSettings = new()
+        static readonly JsonSerializerSettings serializerSettings = new()
         {
             Formatting = Formatting.Indented,
             NullValueHandling = NullValueHandling.Ignore
@@ -31,7 +31,7 @@ namespace Rizline_Chart_Split_Combine
                     {
                         if (string.IsNullOrEmpty(directory))
                         {
-                            directory = PyInput("请输入json文件目录：", "charts");
+                            directory = PyInput("请输入谱面文件目录：", "charts");
                         }
                         if (!Directory.Exists(directory))
                         {
@@ -57,6 +57,7 @@ namespace Rizline_Chart_Split_Combine
                     }
                     else
                     {
+                        PyPrint("手动导入");
                         ManualImport();
                     }
                     Pause();
@@ -74,35 +75,35 @@ namespace Rizline_Chart_Split_Combine
 
         private static void FullyAutomatic()
         {
-            string settingPath = Path.Combine(Directory.GetCurrentDirectory(), "settings.json");
+            string settingPath = Path.Combine(Directory.GetCurrentDirectory(), "charts", "settings.json");
             if (!Path.Exists(settingPath))
             {
                 return;
             }
             try
             {
-                PyPrint($"当前目录下读取到配置文件：{settingPath}");
+                PyPrint($"读取到配置文件：{settingPath}");
                 string json = File.ReadAllText(settingPath);
                 settings = JsonConvert.DeserializeObject<Settings>(json);
                 if (!settings.automatic)
                 {
-                    if (YNChoose("是否选择当前目录为谱面文件目录？（Y/N）"))
+                    if (YNChoose($"是否选择{Path.Combine(Directory.GetCurrentDirectory(), "charts")}为谱面文件目录？（Y/N）"))
                     {
-                        directory = Directory.GetCurrentDirectory();
+                        directory = Path.Combine(Directory.GetCurrentDirectory(), "charts");
                     }
                     return;
                 }
                 if (!settings.Check(out string message))
                 {
                     PyPrint($"配置文件参数不正确：{settingPath}，原因：{message}");
-                    if (YNChoose("是否选择当前目录为谱面文件目录？（Y/N）"))
+                    if (YNChoose($"是否选择{Path.Combine(Directory.GetCurrentDirectory(), "charts")}为谱面文件目录？（Y/N）"))
                     {
-                        directory = Directory.GetCurrentDirectory();
+                        directory = Path.Combine(Directory.GetCurrentDirectory(), "charts");
                     }
                     return;
                 }
-                PyPrint("已启用全自动模式，程序将自动导入当前目录下的谱面文件并输出结果谱面文件");
-                directory = Directory.GetCurrentDirectory();
+                PyPrint("已启用全自动模式");
+                directory = Path.Combine(Directory.GetCurrentDirectory(), "charts");
                 AutoImport();
                 Init();
                 isFullyAutomaticFinished = true;
@@ -110,9 +111,9 @@ namespace Rizline_Chart_Split_Combine
             catch (Exception e)
             {
                 PyPrint(e.Message);
-                if (YNChoose("是否选择当前目录为谱面文件目录？（Y/N）"))
+                if (YNChoose($"是否选择{Path.Combine(Directory.GetCurrentDirectory(), "charts")}为谱面文件目录？（Y/N）"))
                 {
-                    directory = Directory.GetCurrentDirectory();
+                    directory = Path.Combine(Directory.GetCurrentDirectory(), "charts");
                 }
                 Console.Clear();
                 return;
