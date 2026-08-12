@@ -83,7 +83,7 @@
   "finalCameraMoveEaseSetZero": false,
   "cameraMoveOffset": 0.01,
   "baseChartName": "base_chart.json",
-  "files": ["Chart_EZ.json", "Chart_IN.json"],
+  "files": ["Chart_EZ.json", "Chart_HD.json", "Chart_IN.json", "Chart_AT.json"],
   "resultName": "result_chart",
   "autoOverWritten": true,
   "automatic": false
