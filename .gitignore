@@ -367,3 +367,6 @@ FodyWeavers.xsd
 
 #Codebuddy
 .codebuddy/
+
+#.editorconfig
+.editorconfig
