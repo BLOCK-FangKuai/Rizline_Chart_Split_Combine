@@ -99,7 +99,7 @@
 
 ```
 Rizline_Chart/
-├── Program.cs       # 主程序入口及合并逻辑
+├── Program.cs       # 主程序
 ├── Chart.cs         # 谱面数据模型定义
 ├── Settings.cs      # 配置模型定义
 └── Rizline_Chart_Split_Combine.csproj  # 项目文件
