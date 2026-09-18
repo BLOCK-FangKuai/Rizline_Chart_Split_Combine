@@ -64,7 +64,10 @@
 | 参数 | 类型 | 默认值 | 说明 |
 |------|------|--------|------|
 | `splitTimes` | `float[]` | `[]` | 分割时间点（节拍），数量 = 谱面文件数 - 1 |
-| `overlapTime` | `float` | `0` | `linePoints` 和 `canvasMoves` 截取范围的扩展量（节拍）。使 `linePoints` 的截取区间为 `[start - overlapTime, end + overlapTime]`， `canvasMoves` 的截取区间为 `[0, end + overlapTime]`|
+| `cutNote` | `bool` | `true` | 是否对 note 按分割点截取。设为 `false` 时 note 与 `linePoints` 一样使用 `overlapTime` 扩展的区间。当 `cutLine` 的值为 `false` 时此项不生效 |
+| `removeEndNote` | `bool` | `true` | 是否移除恰好落在段结束边界的 note。当 `cutLine` 的值为 `false` 时此项不生效 |
+| `overlapTime` | `float` | `0` | `linePoints` 和 `canvasMoves` 截取范围的扩展量（节拍）。使 `linePoints` 的截取区间为 `[start - overlapTime, end + overlapTime]`， `canvasMoves` 的截取区间为 `[0, end + overlapTime]`。当 `cutLine` 的值为 `false` 时此项不生效 |
+| `cutLine` | `bool` | `true` | 是否对 `linePoints` 和 `canvasMoves` 进行截取 |
 | `finalCameraMoveEaseSetZero` | `bool` | `false` | 是否移除截取结果中最后一个时间超出段边界的关键帧，并将相邻末帧的缓动类型设为 `zero`。此项为 `true` 时 `cameraMoveOffset` 不生效 |
 | `cameraMoveOffset` | `float` | `0.015625` | 将每段截取结果中最后一个摄像机移动关键帧的时间向前偏移的量（节拍）。当 `finalCameraMoveEaseSetZero` 的值为 `true` 时此项不生效。范围 `(0, 0.015625]` |
 | `baseChartName` | `string` | `"base.json"` | 基础谱面文件名 |
@@ -73,13 +76,15 @@
 | `autoOverWritten` | `bool` | `false` | 是否自动覆盖已存在的输出文件。若写入失败，会让用户重新输入文件名 |
 | `automatic` | `bool` | `false` | 是否启用全自动模式 |
 
-
 ### 示例配置
 
 ```json
 {
   "splitTimes": [16, 32, 48],
+  "cutNote": true,
+  "removeEndNote": true,
   "overlapTime": 4,
+  "cutLine": true,
   "finalCameraMoveEaseSetZero": false,
   "cameraMoveOffset": 0.01,
   "baseChartName": "base_chart.json",
@@ -89,6 +94,8 @@
   "automatic": false
 }
 ```
+
+*小提示：把 `cutNote`、`removeEndNote`、`cutLine` 都设为 `false` 就可以做到不截断线、音符和画布运动，只拼接相机运动的关键帧，把画布整合在一起*
 
 ### 谱面文件说明
 
