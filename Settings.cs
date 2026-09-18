@@ -3,7 +3,9 @@
     public class Settings
     {
         public List<float> splitTimes = new();
+        public bool cutNote = true;
         public float overlapTime = 0;
+        public bool cutLine = true;
         public bool finalCameraMoveEaseSetZero = false;
         public float cameraMoveOffset = 0.015625f;
         public string baseChartName = "base.json";
