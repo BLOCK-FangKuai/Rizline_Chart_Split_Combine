@@ -4,6 +4,7 @@
     {
         public List<float> splitTimes = new();
         public bool cutNote = true;
+        public bool removeEndNote = true;
         public float overlapTime = 0;
         public bool cutLine = true;
         public bool finalCameraMoveEaseSetZero = false;
