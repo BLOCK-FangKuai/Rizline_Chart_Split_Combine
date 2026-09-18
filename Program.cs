@@ -305,6 +305,11 @@ namespace Rizline_Chart_Split_Combine
 
         private static Line CutLine(Line line, List<CanvasMove> cameraMoves, float start, float end, float overlap)
         {
+            if (!settings.cutLine)
+            {
+                return line;
+            }
+
             float lineStart = start - overlap;
             float lineEnd = end + overlap;
 
@@ -368,7 +373,28 @@ namespace Rizline_Chart_Split_Combine
             }
 
             //截取在指定时间内的note
-            line.notes = line.notes.FindAll(note => note.time >= start && note.time < end);
+            if (settings.cutNote)
+            {
+                if (settings.removeEndNote)
+                {
+                    line.notes = line.notes.FindAll(note => note.time >= start && note.time < end);
+                }
+                else
+                {
+                    line.notes = line.notes.FindAll(note => note.time >= start && note.time <= end);
+                }
+            }
+            else
+            {
+                if (settings.removeEndNote)
+                {
+                    line.notes = line.notes.FindAll(note => note.time >= lineStart && note.time < lineEnd);
+                }
+                else
+                {
+                    line.notes = line.notes.FindAll(note => note.time >= lineStart && note.time <= lineEnd);
+                }
+            }
 
             //修正hold尾部的画布编号
             List<Note> holds = line.notes.FindAll(note => note.type == NoteType.hold);
@@ -380,19 +406,31 @@ namespace Rizline_Chart_Split_Combine
             //将超界的hold的结束时间设置为分割结束时间
             for (int i = 0; i < holds.Count; i++)
             {
-                if (holds[i].otherInformations[0] > end)
+                //如果hold头落在结束时间，则替换成tap
+                if (!settings.removeEndNote && holds[i].time.Equals(settings.cutNote ? end : lineEnd))
                 {
-                    holds[i].otherInformations[0] = end;
+                    holds[i].type = NoteType.tap;
+                    holds[i].otherInformations = [];
+                }
+                if (holds[i].otherInformations.Length == 3 && holds[i].otherInformations[0] > (settings.cutNote ? end : lineEnd))
+                {
+                    holds[i].otherInformations[0] = (settings.cutNote ? end : lineEnd);
                     float originalCanvasIndex = holds[i].otherInformations[1] - resultChart.canvasMoves.Count;
                     CanvasMove canvasMove = cameraMoves.Find(canvasMove => canvasMove.index == originalCanvasIndex);
                     holds[i].otherInformations[2] = CalculateFloorPosition(canvasMove, holds[i].otherInformations[0]);
                 }
             }
+
             return line;
         }
 
         private static CanvasMove CutCanvasMove(CanvasMove canvasMove, float start, float end, float overlap)
         {
+            if (!settings.cutLine)
+            {
+                return canvasMove;
+            }
+
             start -= overlap;
             end += overlap;
 
