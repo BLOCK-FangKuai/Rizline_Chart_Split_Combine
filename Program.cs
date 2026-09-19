@@ -455,6 +455,16 @@ namespace Rizline_Chart_Split_Combine
             canvasMove.xPositionKeyPoints = inKeyPoints;
 
             inKeyPoints = canvasMove.speedKeyPoints.FindAll(point =>point.time <= end);
+            if (inKeyPoints.Count < 1)
+            {
+                inKeyPoints.Add(new()
+                {
+                    time = 0,
+                    value = canvasMove.speedKeyPoints[0].value,
+                    easeType = canvasMove.speedKeyPoints[0].easeType,
+                    floorPosition = 0
+                });
+            }
             canvasMove.speedKeyPoints = inKeyPoints;
 
             return canvasMove;
