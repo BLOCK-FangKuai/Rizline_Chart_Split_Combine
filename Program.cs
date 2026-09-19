@@ -140,7 +140,7 @@ namespace Rizline_Chart_Split_Combine
                 {
                     PyPrint($"[{i + 1}] {settings.files[i]}");
                 }
-                throw new Exception();
+                throw new Exception("文件夹内谱面文件数目m与配置文件的时间分割点的数量n不对应：m≠n+1");
             }
             CombineCharts();
             OutputChart();
@@ -305,6 +305,18 @@ namespace Rizline_Chart_Split_Combine
 
         private static Line CutLine(Line line, List<CanvasMove> cameraMoves, float start, float end, float overlap)
         {
+            //增加画布的编号
+            foreach (var point in line.linePoints)
+            {
+                point.canvasIndex += resultChart.canvasMoves.Count;
+            }
+            //修正hold尾部的画布编号
+            List<Note> holds = line.notes.FindAll(note => note.type == NoteType.hold);
+            for (int i = 0; i < holds.Count; i++)
+            {
+                holds[i].otherInformations[1] += resultChart.canvasMoves.Count;
+            }
+
             if (!settings.cutLine)
             {
                 return line;
@@ -366,12 +378,6 @@ namespace Rizline_Chart_Split_Combine
 
             line.linePoints = inLinePoints;
 
-            //增加画布的编号
-            foreach (var point in line.linePoints)
-            {
-                point.canvasIndex += resultChart.canvasMoves.Count;
-            }
-
             //截取在指定时间内的note
             if (settings.cutNote)
             {
@@ -394,13 +400,6 @@ namespace Rizline_Chart_Split_Combine
                 {
                     line.notes = line.notes.FindAll(note => note.time >= lineStart && note.time <= lineEnd);
                 }
-            }
-
-            //修正hold尾部的画布编号
-            List<Note> holds = line.notes.FindAll(note => note.type == NoteType.hold);
-            for (int i = 0; i < holds.Count; i++)
-            {
-                holds[i].otherInformations[1] += resultChart.canvasMoves.Count;
             }
 
             //将超界的hold的结束时间设置为分割结束时间
@@ -426,6 +425,9 @@ namespace Rizline_Chart_Split_Combine
 
         private static CanvasMove CutCanvasMove(CanvasMove canvasMove, float start, float end, float overlap)
         {
+            //修正画布编号
+            canvasMove.index += resultChart.canvasMoves.Count;
+
             if (!settings.cutLine)
             {
                 return canvasMove;
@@ -433,8 +435,6 @@ namespace Rizline_Chart_Split_Combine
 
             start -= overlap;
             end += overlap;
-
-            canvasMove.index += resultChart.canvasMoves.Count;
 
             //截取在指定时间内的关键帧节点，将最后的超界的关键帧节点的时间设置为边界值
             List<KeyPoint> inKeyPoints = canvasMove.xPositionKeyPoints.FindAll(point => point.time <= end);
@@ -474,7 +474,6 @@ namespace Rizline_Chart_Split_Combine
                         time = start,
                         value = cameraMove.xPositionKeyPoints[firstPointIndex - 1].value,
                         easeType = cameraMove.xPositionKeyPoints[firstPointIndex - 1].easeType,
-                        floorPosition = cameraMove.xPositionKeyPoints[firstPointIndex - 1].floorPosition
                     };
                     if (inKeyPoints.Count == 0 || inKeyPoints[0].time != start)
                     {
@@ -506,7 +505,6 @@ namespace Rizline_Chart_Split_Combine
                             time = end,
                             value = cameraMove.xPositionKeyPoints[finalPointIndex + 1].value,
                             easeType = cameraMove.xPositionKeyPoints[finalPointIndex + 1].easeType,
-                            floorPosition = cameraMove.xPositionKeyPoints[finalPointIndex + 1].floorPosition
                         };
                         if (inKeyPoints.Count == 0 || inKeyPoints[^1].time != end)
                         {
